@@ -1,0 +1,9 @@
+{
+  "name": "Rutinitas Harian",
+  "short_name": "Rutinitas",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4CAF50",
+  "icons": []
+}

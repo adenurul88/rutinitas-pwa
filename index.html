@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rutinitas Harian</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4CAF50">
+
+<style>
+body { font-family: Arial; margin: 0; padding: 10px; background: #f5f5f5; }
+h2 { margin-top: 20px; }
+.task { background: #fff; padding: 10px; margin-bottom: 10px; border-radius: 8px; }
+img { max-width: 100%; border-radius: 6px; margin-top: 5px; }
+button { margin-top: 5px; }
+small { color: #555; }
+</style>
+</head>
+
+<body>
+
+<h1>Rutinitas Harian</h1>
+
+<input type="date" id="datePicker">
+<button onclick="loadDay()">Muat</button>
+
+<div id="tasks"></div>
+
+<h2>Riwayat</h2>
+<button onclick="showHistory()">Lihat Riwayat</button>
+<div id="history"></div>
+
+<script>
+const routine = [
+ "Mandi Pagi","Shalat Subuh","Dzikir Pagi","Sapu Pel Rumah",
+ "Olahraga","Duolingo","Baca Buku","Pembersihan Rumah"
+];
+
+const dbName = "rutinitasDB";
+let db;
+
+const req = indexedDB.open(dbName,1);
+req.onupgradeneeded = e=>{
+ db = e.target.result;
+ db.createObjectStore("data",{keyPath:"id"});
+};
+req.onsuccess = e=>{ db=e.target.result; init(); };
+
+function init(){
+ document.getElementById("datePicker").valueAsDate = new Date();
+ loadDay();
+}
+
+function loadDay(){
+ const date = datePicker.value;
+ const box = document.getElementById("tasks");
+ box.innerHTML="";
+ routine.forEach(r=>{
+  box.innerHTML += `
+   <div class="task">
+    <b>${r}</b><br>
+    <input type="file" accept="image/*" onchange="savePhoto(event,'${date}','${r}')"><br>
+    <div id="${date}-${r}"></div>
+   </div>`;
+  loadPhoto(date,r);
+ });
+}
+
+function savePhoto(e,date,task){
+ const file = e.target.files[0];
+ const reader = new FileReader();
+ reader.onload = ()=>{
+  const time = new Date().toLocaleTimeString();
+  const tx = db.transaction("data","readwrite");
+  tx.objectStore("data").put({
+   id: date+"-"+task,
+   img: reader.result,
+   time
+  });
+  loadPhoto(date,task);
+ };
+ reader.readAsDataURL(file);
+}
+
+function loadPhoto(date,task){
+ const tx = db.transaction("data","readonly");
+ const req = tx.objectStore("data").get(date+"-"+task);
+ req.onsuccess=()=>{
+  if(req.result){
+   document.getElementById(date+"-"+task).innerHTML=
+   `<img src="${req.result.img}">
+    <br><small>Upload: ${req.result.time}</small>
+    <br><button onclick="deletePhoto('${date}','${task}')">Hapus</button>`;
+  }
+ };
+}
+
+function deletePhoto(date,task){
+ const tx = db.transaction("data","readwrite");
+ tx.objectStore("data").delete(date+"-"+task);
+ loadPhoto(date,task);
+}
+
+function showHistory(){
+ const out = document.getElementById("history");
+ out.innerHTML="";
+ const tx = db.transaction("data","readonly");
+ tx.objectStore("data").openCursor().onsuccess=e=>{
+  const c = e.target.result;
+  if(c){
+   out.innerHTML += `<div>${c.key} - ${c.value.time}</div>`;
+   c.continue();
+  }
+ };
+}
+
+if("serviceWorker" in navigator){
+ navigator.serviceWorker.register("service-worker.js");
+}
+</script>
+
+</body>
+</html>
