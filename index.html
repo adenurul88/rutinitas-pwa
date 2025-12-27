@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Progress Target Hidup</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Daydream&family=Amanda&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --pink:#f7c6d9;
+  --green:#c8e6c9;
+  --yellow:#fff3b0;
+  --bg:#fffdf7;
+  --text:#444;
+}
+
+body{
+  font-family:'Amanda',sans-serif;
+  color:var(--text);
+  padding:20px;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(247,198,217,0.4) 10%, transparent 11%),
+    radial-gradient(circle at 80% 30%, rgba(247,198,217,0.35) 8%, transparent 9%),
+    radial-gradient(circle at 50% 80%, rgba(247,198,217,0.4) 10%, transparent 11%),
+    linear-gradient(120deg, #fffde7, #f1f8e9, #fff0f5);
+  background-size:300px 300px, 250px 250px, 280px 280px, cover;
+}
+
+h1{
+  font-family:'Daydream',cursive;
+  text-align:center;
+  margin-bottom:30px;
+}
+
+.section{
+  background:rgba(255,255,255,0.92);
+  border-radius:18px;
+  padding:20px;
+  margin-bottom:25px;
+  box-shadow:0 8px 18px rgba(0,0,0,0.08);
+  border:2px solid rgba(255,240,180,0.6);
+}
+
+.section h2{
+  margin-bottom:10px;
+}
+
+.progress-bar{
+  background:#f1f1f1;
+  border-radius:12px;
+  overflow:hidden;
+  height:22px;
+  margin-bottom:10px;
+}
+
+.progress{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,var(--yellow),var(--green),var(--pink));
+  transition:0.4s;
+}
+
+ul{
+  list-style:none;
+  padding:0;
+}
+
+li{
+  margin:8px 0;
+}
+
+label{
+  cursor:pointer;
+  transition:0.2s;
+}
+
+label:hover{
+  color:#d48aa3;
+}
+
+/* CONFETTI */
+.confetti{
+  position:fixed;
+  bottom:-10px;
+  width:8px;
+  height:14px;
+  background:gold;
+  animation:shoot 1.2s ease-out forwards;
+  opacity:0.9;
+}
+
+@keyframes shoot{
+  0%{
+    transform:translateY(0) rotate(0deg);
+    opacity:1;
+  }
+  100%{
+    transform:translateY(-600px) rotate(720deg);
+    opacity:0;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<h1>🌸 Progress Target Hidup 🌸</h1>
+
+<!-- ================= BACA BUKU ================= -->
+<div class="section">
+<h2>📚 Baca Buku (✓ = 2 Bab)</h2>
+<div class="progress-bar"><div class="progress" id="bookProgress"></div></div>
+<p id="bookText"></p>
+<ul id="books"></ul>
+</div>
+
+<!-- ================= PEMBERSIHAN ================= -->
+<div class="section">
+<h2>🧹 Pembersihan Cicilan</h2>
+<div class="progress-bar"><div class="progress" id="cleanProgress"></div></div>
+<p id="cleanText"></p>
+<ul id="cleaning"></ul>
+</div>
+
+<!-- ================= HAFALAN ================= -->
+<div class="section">
+<h2>📐 Hafalan Matematika</h2>
+<div class="progress-bar"><div class="progress" id="mathProgress"></div></div>
+<p id="mathText"></p>
+<ul id="math"></ul>
+</div>
+
+<script>
+// ================= DATA =================
+const books = [
+  {title:"Funiculi Funicula", checks:2},
+  {title:"Negeri 5 Menara", checks:23},
+  {title:"Rantau 1 Muara", checks:23},
+  {title:"Ramah 3 Warna", checks:26},
+  {title:"Sang Pemimpi", checks:14},
+  {title:"Ayah & Sirkus Pohon", checks:10}
+];
+
+const cleaning = [
+ "Tempat Cuci Piring","Kamar Mandi Belakang","Meja Dapur","Kamar Belakang",
+ "Ruang Tengah","Kamar Tengah","Kamar Mandi Depan","Ruang Tamu",
+ "Kamar Depan","Teras"
+];
+
+const math = [
+"Kalkulus & Analisis Dasar","Limit (fungsi & barisan)","Kontinuitas",
+"Turunan & integral","Konvergensi barisan & deret",
+"Deret geometri & Taylor (bentuk umum)","Supremum & infimum",
+"Cauchy sequence (dasar)","Aljabar Linear","Vektor & ruang vektor",
+"Basis & dimensi","Transformasi linear","Matriks & determinan","Rank",
+"Eigenvalue & eigenvector","Ortogonalitas, inner product","Aljabar Abstrak",
+"Grup & subgrup","Grup siklik","Homomorfisme grup",
+"Ring & field (definisi dasar)","Ideal (pengantar)","Matematika Diskrit",
+"Logika proposisional","Himpunan & relasi","Fungsi (injektif, surjektif, bijektif)",
+"Induksi matematika","Kombinatorika dasar","Kalkulus","Aturan turunan",
+"Integral standar","Teorema Fundamental Kalkulus","Deret Taylor fungsi dasar",
+"Integral parsial & substitusi","Aljabar Linear","Determinan (2×2, 3×3)",
+"Invers matriks kecil","Persamaan karakteristik","Diagonalisasi (langkah umum)",
+"Teorema dasar","Teorema Limit","Teorema Nilai Tengah","Rolle","Teorema Taylor",
+"Rank–Nullity","Teorema Isomorfisme Grup (awal)","Manipulasi aljabar",
+"Substitusi & integrasi parsial","Menentukan konvergensi deret",
+"Menyusun pembuktian sederhana","Menggunakan induksi","Pola pembuktian S1",
+"Pembuktian langsung","Kontradiksi (dasar)","Induksi matematika",
+"Fungsi kontinu tapi tidak terdiferensial","Barisan konvergen tapi tidak monoton",
+"Grup abelian & non-abelian","Ruang vektor dengan basis takfungsi", "Relasi yang bukan fungsi"
+];
+
+// ================= STORAGE =================
+const save = ()=>localStorage.setItem("progress",JSON.stringify(state));
+const load = ()=>JSON.parse(localStorage.getItem("progress")) || {
+ books:[],cleaning:[],math:[]
+};
+let state = load();
+
+// ================= CONFETTI =================
+function confetti(){
+  for(let i=0;i<25;i++){
+    let c=document.createElement("div");
+    c.className="confetti";
+    c.style.left=Math.random()*100+"vw";
+    c.style.background=`hsl(${45+Math.random()*20},100%,55%)`;
+    c.style.animationDuration=0.8+Math.random()*0.6+"s";
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),1500);
+  }
+}
+
+// ================= RENDER =================
+function render(){
+  renderBooks();
+  renderList("cleaning",cleaning,"cleanProgress","cleanText",state.cleaning);
+  renderList("math",math,"mathProgress","mathText",state.math);
+  save();
+}
+
+// ================= BUKU =================
+function renderBooks(){
+  let ul=document.getElementById("books");
+  ul.innerHTML="";
+  let totalBab=books.reduce((a,b)=>a+b[1],0);
+  let doneBab=state.books.length*2;
+
+  books.forEach((b,i)=>{
+    let li=document.createElement("li");
+    let checked=state.books.includes(i)?"checked":"";
+    li.innerHTML=`<label><input type="checkbox" ${checked}
+      onchange="toggleBook(${i})"> ${b[0]} (✓ = 2 bab)</label>`;
+    ul.appendChild(li);
+  });
+
+  let percent=Math.min(doneBab/totalBab*100,100);
+  bookProgress.style.width=percent+"%";
+  bookText.innerText=`${doneBab} / ${totalBab} bab (${percent.toFixed(1)}%)`;
+}
+
+function toggleBook(i){
+  let idx=state.books.indexOf(i);
+  idx>-1?state.books.splice(idx,1):state.books.push(i);
+  confetti();
+  render();
+}
+
+// ================= LIST UMUM =================
+function renderList(id,data,bar,text,checked){
+  let ul=document.getElementById(id);
+  ul.innerHTML="";
+  data.forEach((d,i)=>{
+    let li=document.createElement("li");
+    let c=checked.includes(i)?"checked":"";
+    li.innerHTML=`<label><input type="checkbox" ${c}
+      onchange="toggle('${id}',${i})"> ${d}</label>`;
+    ul.appendChild(li);
+  });
+  let percent=checked.length/data.length*100;
+  document.getElementById(bar).style.width=percent+"%";
+  document.getElementById(text).innerText=
+    `${checked.length} / ${data.length} (${percent.toFixed(1)}%)`;
+}
+
+function toggle(type,i){
+  let arr=state[type];
+  let idx=arr.indexOf(i);
+  idx>-1?arr.splice(idx,1):arr.push(i);
+  confetti();
+  render();
+}
+
+render();
+</script>
+
+</body>
+</html>
